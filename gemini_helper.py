@@ -7,8 +7,12 @@ import re
 CANDIDATE_MODELS = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp', 'gemini-3.6-flash']
 
 def configure_api():
-    if Config.GEMINI_API_KEY:
-        genai.configure(api_key=Config.GEMINI_API_KEY)
+    key = Config.GEMINI_API_KEY
+    if key:
+        clean_key = str(key).strip().strip("'").strip('"')
+        genai.configure(api_key=clean_key)
+    else:
+        raise Exception("GEMINI_API_KEY environment variable is not configured.")
 
 def generate_content_with_fallback(prompt):
     """
@@ -27,7 +31,7 @@ def generate_content_with_fallback(prompt):
             last_exception = e
             continue
             
-    raise Exception(f"Failed to generate response across candidate models: {str(last_exception)}")
+    raise Exception(f"Gemini API Error: {str(last_exception)}")
 
 def generate_normal_response(prompt):
     """

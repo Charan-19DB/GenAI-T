@@ -130,6 +130,11 @@ def chat():
     except Exception as e:
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
+@app.errorhandler(500)
+def handle_500_error(e):
+    return jsonify({'error': 'Server Error (500). Please check that GEMINI_API_KEY is configured in Render Environment Variables.'}), 500
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)

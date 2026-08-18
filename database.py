@@ -3,8 +3,16 @@ import os
 from config import Config
 
 def get_db_connection():
-    os.makedirs(os.path.dirname(Config.DATABASE_PATH), exist_ok=True)
-    conn = sqlite3.connect(Config.DATABASE_PATH)
+    try:
+        db_dir = os.path.dirname(Config.DATABASE_PATH)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
+        conn = sqlite3.connect(Config.DATABASE_PATH, check_same_thread=False)
+    except Exception:
+        # Fallback path for Linux cloud hosting permissions (e.g. Render /tmp)
+        fallback_path = os.path.join('/tmp', 'app.db')
+        conn = sqlite3.connect(fallback_path, check_same_thread=False)
+        
     conn.row_factory = sqlite3.Row
     return conn
 
