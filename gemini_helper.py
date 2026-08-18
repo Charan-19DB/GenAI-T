@@ -3,23 +3,38 @@ from config import Config
 import json
 import re
 
-# Configure the API key
-if Config.GEMINI_API_KEY:
-    genai.configure(api_key=Config.GEMINI_API_KEY)
+# Candidate models in order of preference for high compatibility
+CANDIDATE_MODELS = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp', 'gemini-3.6-flash']
 
-MODEL_NAME = 'gemini-3.6-flash'
+def configure_api():
+    if Config.GEMINI_API_KEY:
+        genai.configure(api_key=Config.GEMINI_API_KEY)
 
-def get_model():
-    return genai.GenerativeModel(MODEL_NAME)
+def generate_content_with_fallback(prompt):
+    """
+    Attempts to generate content trying candidate Gemini models.
+    """
+    configure_api()
+    last_exception = None
+
+    for model_name in CANDIDATE_MODELS:
+        try:
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            if response and hasattr(response, 'text') and response.text:
+                return response.text
+        except Exception as e:
+            last_exception = e
+            continue
+            
+    raise Exception(f"Failed to generate response across candidate models: {str(last_exception)}")
 
 def generate_normal_response(prompt):
     """
-    Sends a standard prompt to the Gemini API.
+    Sends a standard prompt to the Gemini API with automatic model fallbacks.
     """
     try:
-        model = get_model()
-        response = model.generate_content(prompt)
-        return response.text
+        return generate_content_with_fallback(prompt)
     except Exception as e:
         return f"Error generating response: {str(e)}"
 
@@ -29,7 +44,6 @@ def extract_json_block(text):
     if match:
         return match.group(1)
     
-    # Try to find { } or [ ] blocks directly
     match = re.search(r'(\{.*\}|\[.*\])', text, re.DOTALL)
     if match:
         return match.group(1)
@@ -40,25 +54,20 @@ def generate_json_with_refinement(prompt, max_retries=2):
     Attempts to generate valid JSON. If it fails to parse, it prompts the model again with the syntax error.
     Returns (json_data, final_raw_text, was_refined, success).
     """
-    model = get_model()
     current_prompt = prompt
     was_refined = False
+    raw_text = ""
     
     for attempt in range(max_retries):
         try:
-            response = model.generate_content(current_prompt)
-            raw_text = response.text
-            
+            raw_text = generate_content_with_fallback(current_prompt)
             extracted_json = extract_json_block(raw_text)
             
             # Try to parse it
             parsed_data = json.loads(extracted_json)
-            
-            # If successful
             return parsed_data, raw_text, was_refined, True
             
         except json.JSONDecodeError as e:
-            # It failed. If we have retries left, refine the prompt.
             was_refined = True
             current_prompt = f"{prompt}\n\nThe previous attempt produced invalid JSON. Error: {str(e)}. Please provide ONLY valid, parseable JSON without extra text."
         except Exception as e:

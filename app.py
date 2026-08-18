@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
+from werkzeug.middleware.proxy_fix import ProxyFix
 from config import Config
 
 import database
@@ -11,8 +12,12 @@ import json
 app = Flask(__name__)
 app.config.from_object(Config)
 
+# Enable ProxyFix for Render HTTPS reverse proxy sessions
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 # Initialize database
 database.init_db()
+
 
 # Register auth blueprint
 app.register_blueprint(auth_bp)
