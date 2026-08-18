@@ -125,15 +125,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const contentType = response.headers.get('content-type');
             let data = {};
+            let errorText = '';
 
             if (contentType && contentType.includes('application/json')) {
                 data = await response.json();
+                if (data.error) errorText = data.error;
             } else {
                 if (response.status === 401 || response.redirected) {
                     window.location.href = '/login';
                     return;
                 }
-                throw new Error(`Server error (${response.status}). If using Render, ensure GEMINI_API_KEY is set under Environment Variables.`);
+                const text = await response.text();
+                errorText = `Server error (${response.status}): ${text.substring(0, 150)}`;
             }
 
             if (!response.ok) {
@@ -141,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.location.href = '/login';
                     return;
                 }
-                throw new Error(data.error || 'Failed to generate AI response.');
+                throw new Error(errorText || data.error || 'Failed to generate AI response.');
             }
 
             // 5. Append Assistant Response based on payload type
@@ -167,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function appendMessage(text, sender) {
         const div = document.createElement('div');
-        div.className = `chat-bubble ${sender}-bubble`;
+        div.className = `chat-bubble user-bubble`;
         div.textContent = text;
         chatHistory.appendChild(div);
         scrollToBottom();
@@ -207,7 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div>${baselineHtml}</div>
                 </div>
                 <div class="cot-panel markdown-body" style="border-color: rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.04);">
-
                     <h4>🧠 Chain-of-Thought</h4>
                     <div>${cotHtml}</div>
                 </div>
