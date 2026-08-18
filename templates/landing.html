@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="landing-container">
+    <!-- Hero Section Header -->
+    <div class="hero-section" style="padding-bottom: 2rem;">
+        <div class="hero-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span>Powered by Google Gemini 3.6 Flash</span>
+        </div>
+        
+        <h1 class="hero-title">
+            Master <span class="gradient-text">Prompt Engineering</span><br>with Real-Time Validation
+        </h1>
+        
+        <p class="hero-subtitle">
+            An advanced playground to benchmark and validate prompt techniques. Test structured Markdown formats, auto-repair invalid JSON, and compare Chain-of-Thought reasoning side-by-side.
+        </p>
+        
+        <div class="hero-buttons">
+            <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-large">
+                Get Started Free
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-large">
+                Log In to Sandbox
+            </a>
+        </div>
+    </div>
+
+    <!-- Position 1: Features Grid Section -->
+    <div class="features-grid" style="margin-bottom: 4rem;">
+        <div class="feature-card">
+            <div class="feature-icon-wrapper">🧠</div>
+            <h3>Chain-of-Thought Baseline</h3>
+            <p>Compare baseline zero-shot responses directly against step-by-step reasoning outputs to evaluate logic performance.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon-wrapper">⚙️</div>
+            <h3>JSON Auto-Refinement</h3>
+            <p>Convert free-text into strict parseable JSON. If syntax errors occur, our smart loop automatically reprompts and self-heals the output.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon-wrapper">📝</div>
+            <h3>Structured Formats</h3>
+            <p>Force model output into pristine Markdown tables, bulleted lists, and structured schema with backend structural verification.</p>
+        </div>
+    </div>
+
+    <!-- Position 2: Interactive Showcase Preview Card -->
+    <div class="hero-preview-card">
+        <div class="preview-header">
+            <div class="preview-dot dot-red"></div>
+            <div class="preview-dot dot-yellow"></div>
+            <div class="preview-dot dot-green"></div>
+            <span class="preview-title">PromptGenius Playground • Chain-of-Thought & JSON Auto-Refinement</span>
+        </div>
+        <div class="cot-comparison" style="margin-top: 0;">
+            <div class="cot-panel markdown-body">
+                <h4 style="font-size: 0.88rem; color: var(--text-muted);">Baseline Response</h4>
+                <p style="font-size: 0.88rem; color: var(--text-secondary);">A farmer has 7 sheep remaining after the loss.</p>
+            </div>
+            <div class="cot-panel markdown-body" style="border-color: rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.04);">
+                <h4 style="font-size: 0.88rem; color: var(--primary-hover);">🧠 Chain-of-Thought Step-by-Step</h4>
+                <p style="font-size: 0.88rem; color: var(--text-primary);">1. "All but 7 die" means exactly 7 survived.<br>2. Adding 5 more sheep gives 12 total sheep.<br>3. Giving half to the neighbor leaves the farmer with 6 sheep.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

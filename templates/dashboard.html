@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - PromptGenius AI Sandbox{% endblock %}
+
+{% block content %}
+<div class="chat-wrapper">
+    <!-- Chat Box Workspace (LEFT SIDE) -->
+    <main class="chat-main">
+        <header class="chat-header">
+            <div class="chat-header-user">
+                <h2>Welcome back, <span class="gradient-text">{{ full_name }}</span></h2>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div id="current-mode-badge" class="badge badge-primary">Mode: General Chat</div>
+                <button id="clear-chat-btn" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" title="Clear conversation view">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Clear Chat
+                </button>
+            </div>
+        </header>
+
+        <div class="chat-history" id="chat-history">
+            <div class="chat-bubble bot-bubble">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge badge-primary">PromptGenius Assistant</span>
+                </div>
+                <p>Hello! I am your <strong>Prompt Engineering validation assistant</strong>. You can chat with me normally, or pick a mode from the right sidebar to test <strong>Structured Tables</strong>, <strong>JSON Auto-Refinement</strong>, or <strong>Chain-of-Thought Reasoning</strong>.</p>
+            </div>
+            <!-- Dynamic Messages Injected Here -->
+        </div>
+
+        <div class="chat-input-container">
+            <div id="error-message" class="flash-message error hidden" style="margin-bottom: 0.75rem;"></div>
+            <div class="input-wrapper">
+                <input type="hidden" id="task-type" value="general">
+                <textarea id="chat-input" rows="1" placeholder="Type your prompt here or select a mode from the right sidebar..."></textarea>
+                <button id="send-btn" class="btn btn-primary" title="Send Prompt">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+            <div class="input-hint">
+                <span>Press <strong>Enter</strong> to send, <strong>Shift + Enter</strong> for a new line</span>
+                <span id="char-count">0 chars</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Testing Modes Sidebar (RIGHT SIDE) -->
+    <aside class="chat-sidebar-right">
+        <div class="sidebar-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            <span>Testing Modes</span>
+        </div>
+        
+        <div class="action-buttons">
+            <!-- Mode 1: General Chat -->
+            <div class="mode-card active action-btn" data-task="general" data-prompt="">
+                <div class="mode-card-header">
+                    <span class="mode-card-title">💬 General Chat</span>
+                    <span class="badge badge-primary" style="font-size: 0.65rem;">Default</span>
+                </div>
+                <div class="mode-card-desc">Standard conversational prompting directly with Gemini.</div>
+            </div>
+
+            <!-- Mode 2: Structured Format -->
+            <div class="mode-card action-btn" data-task="structured" data-prompt="List three benefits of daily exercise in a Markdown table with columns 'Benefit' and 'Description'. Also include a bulleted list of 3 tips to get started.">
+                <div class="mode-card-header">
+                    <span class="mode-card-title">📝 Structured Format</span>
+                </div>
+                <div class="mode-card-desc">Enforces strict Markdown tables & bulleted list responses.</div>
+            </div>
+
+            <!-- Mode 3: JSON Auto-Refine -->
+            <div class="mode-card action-btn" data-task="json" data-prompt="Here is a dataset: 1. Book: '1984', Author: 'George Orwell', Year: 1949. 2. Book: 'To Kill a Mockingbird', Author: 'Harper Lee', Year: 1960. 3. Book: 'The Great Gatsby', Author: 'F. Scott Fitzgerald', Year: 1925. Produce this as valid JSON format.">
+                <div class="mode-card-header">
+                    <span class="mode-card-title">⚙️ JSON Auto-Refine</span>
+                </div>
+                <div class="mode-card-desc">Generates JSON & auto-corrects syntax errors via reprompting.</div>
+            </div>
+
+            <!-- Mode 4: Chain-of-Thought -->
+            <div class="mode-card action-btn" data-task="cot" data-prompt="A farmer has 10 sheep, and all but 7 die. How many are left? Also, if he buys 5 more and gives half of his total flock to his neighbor, how many does he have?">
+                <div class="mode-card-header">
+                    <span class="mode-card-title">🧠 Chain-of-Thought</span>
+                </div>
+                <div class="mode-card-desc">Side-by-side comparison of baseline vs. step-by-step reasoning.</div>
+            </div>
+        </div>
+
+        <div class="quick-prompts-section">
+            <div class="quick-prompts-title">⚡ Quick Preset Prompts</div>
+            <button class="chip-btn" data-preset="Explain Quantum Computing in 3 bullet points and a summary table.">
+                ⚡ Quantum Computing Summary
+            </button>
+            <button class="chip-btn" data-preset="Extract tech stack (Name, Category, Year) as JSON: Python 1991, React 2013, Flask 2010.">
+                ⚡ Tech Stack JSON Parser
+            </button>
+            <button class="chip-btn" data-preset="If a train leaves Station A at 60 mph and another leaves Station B at 80 mph...">
+                ⚡ Speed & Distance Logic Puzzle
+            </button>
+        </div>
+    </aside>
+</div>
+{% endblock %}
