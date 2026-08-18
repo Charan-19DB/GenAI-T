@@ -119,13 +119,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ prompt: prompt, task_type: taskType })
             });
 
-            const data = await response.json();
-            
             // Remove typing indicator
             const typingElem = document.getElementById(typingId);
             if (typingElem) typingElem.remove();
 
+            const contentType = response.headers.get('content-type');
+            let data = {};
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                if (response.status === 401 || response.redirected) {
+                    window.location.href = '/login';
+                    return;
+                }
+                throw new Error(`Server error (${response.status}). If using Render, ensure GEMINI_API_KEY is set under Environment Variables.`);
+            }
+
             if (!response.ok) {
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
                 throw new Error(data.error || 'Failed to generate AI response.');
             }
 
